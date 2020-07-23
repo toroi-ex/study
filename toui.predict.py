@@ -7,12 +7,15 @@ import os
 import glob
 import matplotlib.pyplot as plt
 import openpyxl as xl
+import pandas as pd
+import ezodf
 
 test_dir = '/home/toui/デスクトップ/研究_toui/add_data/DATA6_test/test3/'
 
-excel_dir = "/home/toui/デスクトップ/kekka/kekkaxl.ods"
+excel_dir = "/home/toui/デスクトップ/kekka/kekkax2.xlsx"
 book = xl.load_workbook(excel_dir)
-sheet = book["sheet1"]
+# book = ezodf.opendoc(filename=os.path.basename(excel_dir)).sheets[0]
+sheet = book["Sheet1"]
 
 classes = ["broken", "correct"]
 img_width, img_height = 200, 200
@@ -90,4 +93,10 @@ print(roc_auc_score(y_test_, y_pred_))
 index = 3
 
 for i in range(len(file_name)):
-    
+    sheet.cell(row=index, column=2).value = file_name[i]
+    sheet.cell(row=index, column=3).value = y_test_[i]
+    sheet.cell(row=index, column=5).value = y_pred_[i]
+
+    index += 1
+
+book.save(excel_dir)
