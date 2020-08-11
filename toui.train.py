@@ -19,8 +19,8 @@ nb_classes = len(classes)
 img_width, img_height = 200, 200
 
 # トレーニング用とバリデーション用の画像格納先
-train_data_dir = '/home/toui/デスクトップ/研究_toui/add_data/DATA6_test_100'
-validation_data_dir = '/home/toui/デスクトップ/ori/4/sub_300_1/validation'
+train_data_dir = '/home/toui/デスクトップ/ori/add_data/DATA7_test/test_50'
+# validation_data_dir = '/home/toui/デスクトップ/ori/4/sub_300_1/validation'
 
 #トレーニング用の画像とバリデーション用の画像枚数
 nb_train_samples = 288
@@ -307,6 +307,9 @@ def create_batch_norm_model_only():
     bn_model = Model(input, x)
     return bn_model
 
+def resnet():
+
+    return
 
 def image_generator():
     """ ディレクトリ内の画像を読み込んでトレーニングデータとバリデーションデータの作成 """
@@ -314,7 +317,7 @@ def image_generator():
         rescale=1.0 / 255,
         horizontal_flip=True,
         vertical_flip=True,
-        # zoom_range=0.2,
+        zoom_range=0.2,
         # validation_split=0.2
     )
 
@@ -378,7 +381,7 @@ def step_decay_b(epoch):
 
 if __name__ == "__main__":
     #batch_size = 8
-    nb_epoch = 80
+    nb_epoch = 50
 
     #時間計測
     start = time.time()
@@ -419,7 +422,7 @@ if __name__ == "__main__":
                                    save_best_only=True,save_weights_only=True, mode='min', period=1),
                    # lr_decay,
                    # reduce_lr,
-                   # EarlyStopping(monitor="loss", patience=3),
+                   # EarlyStopping(monitor="loss", patience=4),
         ],
         # validation_data=validation_generator,
         # validation_steps=16,

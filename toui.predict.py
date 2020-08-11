@@ -1,7 +1,7 @@
 from keras.utils import np_utils
 from keras.models import load_model
 from PIL import Image
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_curve, roc_auc_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_curve, roc_auc_score, auc
 import numpy as np
 import os
 import glob
@@ -10,7 +10,7 @@ import openpyxl as xl
 import pandas as pd
 import ezodf
 
-test_dir = '/home/toui/デスクトップ/研究_toui/add_data/DATA6_test/test3/'
+test_dir = '/home/toui/デスクトップ/ori/add_data/DATA7_test/test_50/test/'
 
 excel_dir = "/home/toui/デスクトップ/kekka/kekkax2.xlsx"
 book = xl.load_workbook(excel_dir)
@@ -44,7 +44,7 @@ def make_dataset(path, x, y, z):
 
     x = np.array(x)
     y = np.array(y)
-    z = np.array(z)
+    # z = np.array(z)
 
     x = x.astype("float32")
     x = x / 255.0
@@ -72,30 +72,51 @@ for x in y_preds:
 y_pred_ = np.argmax(y_preds, axis = 1)
 y_test_ = np.argmax(y_test, axis = 1)
 
-print(accuracy_score(y_test_, y_pred_))
+print("accuracy=",accuracy_score(y_test_, y_pred_))
 print(classification_report(y_test_, y_pred_))
 print(confusion_matrix(y_test_, y_pred_))
 
-tn, fp, fn, tp = confusion_matrix(y_test_, y_pred_).flatten()
+tp, fn, fp, tn = confusion_matrix(y_test_, y_pred_).flatten()
+print(tp,fn,fp,tn)
 TPR = tp / (tp + fn)
 FPR = fp / (fp + tn)
 print("TPR="+str(TPR)+" "+"FPR="+str(FPR))
 
-fpr, tpr, thresholds = roc_curve(y_test_, y_pred_)
-plt.plot(fpr, tpr, marker='o')
-plt.xlabel('FPR: False positive rate')
-plt.ylabel('TPR: True positive rate')
-plt.grid()
+fpr, tpr, thresholds = roc_curve(y_test_, y_pred_,drop_intermediate=False)
+auc = auc(fpr, tpr)
+plt.plot(fpr, tpr, label='ROC curve (area = %.2f)'%auc)
+plt.legend()
+plt.title('ROC curve')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.grid(True)
+# plt.plot(fpr, tpr, marker='o')
+# plt.xlabel('FPR: False positive rate')
+# plt.ylabel('TPR: True positive rate')
+# plt.grid(True)
 plt.show()
-print(roc_auc_score(y_test_, y_pred_))
+print("auc="+str(roc_auc_score(y_test_, y_pred_)))
 
 #sheetにどの画像があっているか書き出し
 index = 3
 
+val = []
+ans = []
 for i in range(len(file_name)):
-    sheet.cell(row=index, column=2).value = file_name[i]
-    sheet.cell(row=index, column=3).value = y_test_[i]
-    sheet.cell(row=index, column=5).value = y_pred_[i]
+    file_name[i] = file_name[i].replace(".png", "").replace("-", "").replace("0","",1)
+    val = int(file_name[i]), y_test_[i], y_pred_[i]
+    ans.append(val)
+ans.sort(key=lambda x: x[0])
+
+
+for i in range(len(file_name)):
+    # sheet.cell(row=index, column=2).value = file_name[i]
+    # sheet.cell(row=index, column=3).value = y_test_[i]
+    # sheet.cell(row=index, column=5).value = y_pred_[i]
+
+    sheet.cell(row=index, column=2).value = ans[i][0]
+    sheet.cell(row=index, column=3).value = ans[i][1]
+    sheet.cell(row=index, column=5).value = ans[i][2]
 
     index += 1
 
